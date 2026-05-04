@@ -8,7 +8,7 @@
 mkShell {
   packages = with pkgs; [
     # nix stuff
-    nixfmt-rfc-style
+    nixfmt
     deadnix
     statix
     # PatchELF is a simple utility for modifying existing ELF executables and libraries.
