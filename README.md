@@ -1,8 +1,40 @@
 # Nix Flake · Nix Dev Template
 
-> purr · git-hooks · nix · nixpkgs · reproducible · nix-flake
+> purr · git-hooks · nix · nixpkgs · nix-flake
 
 Base Nix flake development template — a minimal, reproducible dev shell with Nix formatters and git pre-commit hooks. Built on [purr](https://flakehub.com/f/nixcafe/purr) for zero-friction Nix flake scaffolding and [git-hooks.nix](https://flakehub.com/f/cachix/git-hooks.nix) for automated quality gates. Batteries included: auto-formatting, dead-code removal, and static analysis enforced before every commit.
+
+Part of the [develop-templates](https://github.com/nixcafe/develop-templates) collection (`nix flake init`-ready).
+
+## Quick Start
+
+### `nix flake init`
+
+```bash
+nix flake init -t "github:nixcafe/develop-templates#nix" --refresh
+```
+
+Register a short alias:
+```bash
+nix registry add beans "github:nixcafe/develop-templates"
+nix flake init -t beans#nix
+```
+
+> **Tip**: With [cattery-modules](https://github.com/nixcafe/cattery-modules), `beans` is pre-registered.
+
+### Create from Template
+
+```bash
+gh repo create my-nix-project --template nixcafe/nix --clone
+```
+
+### Enter the Dev Shell
+
+```bash
+direnv allow        # auto-load flake on cd
+# or without direnv:
+nix develop
+```
 
 ## What's Inside
 
@@ -13,19 +45,6 @@ Base Nix flake development template — a minimal, reproducible dev shell with N
 | `statix` | Linter for Nix antipatterns    | [statix](https://github.com/oppiliappan/statix) |
 
 All three run as git **pre-commit hooks** *and* are available inside the dev shell (`nix develop`).
-
-## Getting Started
-
-```bash
-# Clone the template
-git clone <repo-url> my-nix-project && cd my-nix-project
-
-# Enter the dev shell (direnv auto-loads if .envrc is allowed)
-nix develop
-
-# Or, if you use direnv:
-direnv allow
-```
 
 ## Customizing
 
@@ -95,6 +114,7 @@ nix_version = '2.4'
 ├── flake.nix                          # Flake entrypoint
 ├── statix.toml                        # statix linter config
 ├── .envrc                             # direnv: `use flake`
+├── .gitignore
 │
 ├── develop/
 │   ├── checks/
