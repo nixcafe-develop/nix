@@ -11,7 +11,7 @@
 │
 │   # Check if your nix file is formatted before uploading
 ├── checks 
-│   └── pre-commit-check
+│   └── git-hooks
 │       └── default.nix
 │
 │   # agenix command support
