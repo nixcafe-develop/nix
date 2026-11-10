@@ -1,83 +1,71 @@
-# Nix Flake · Nix Dev Template
+# Nix development template
 
-> purr · git-hooks · nix · nixpkgs · nix-flake
+Nix flake template for Nix projects. The development shell provides `nixfmt`, `deadnix`, and `statix`, and the same tools are enabled as git pre-commit hooks. The flake is built with [purr](https://flakehub.com/f/nixcafe/purr) and [git-hooks.nix](https://flakehub.com/f/cachix/git-hooks.nix).
 
-Base Nix flake development template — a minimal, reproducible dev shell with Nix formatters and git pre-commit hooks. Built on [purr](https://flakehub.com/f/nixcafe/purr) for zero-friction Nix flake scaffolding and [git-hooks.nix](https://flakehub.com/f/cachix/git-hooks.nix) for automated quality gates. Batteries included: auto-formatting, dead-code removal, and static analysis enforced before every commit.
+This repository is part of the [develop-templates](https://github.com/nixcafe/develop-templates) collection.
 
-Part of the [develop-templates](https://github.com/nixcafe/develop-templates) collection (`nix flake init`-ready).
+## Quick start
 
-## Quick Start
-
-### `nix flake init`
+Create a project from the template:
 
 ```bash
 nix flake init -t "github:nixcafe/develop-templates#nix" --refresh
 ```
 
-Register a short alias:
+To use a shorter registry name:
+
 ```bash
 nix registry add beans "github:nixcafe/develop-templates"
 nix flake init -t beans#nix
 ```
 
-> **Tip**: With [cattery-modules](https://github.com/nixcafe/cattery-modules), `beans` is pre-registered.
+If you use [cattery-modules](https://github.com/nixcafe/cattery-modules), the `beans` registry entry already exists.
 
-### Create from Template
+You can also create a GitHub repository from this template:
 
 ```bash
 gh repo create my-nix-project --template nixcafe-develop/nix --clone
 ```
 
-### Enter the Dev Shell
+Enter the development shell:
 
 ```bash
-direnv allow        # auto-load flake on cd
+direnv allow
 # or without direnv:
 nix develop
 ```
 
-## What's Inside
+## What's included
 
-| Tool     | Purpose                        | More                                          |
-|----------|--------------------------------|-----------------------------------------------|
-| `nixfmt` | Canonical Nix formatter        | [nixfmt](https://github.com/NixOS/nixfmt)      |
-| `deadnix`| Scan & remove dead Nix code    | [deadnix](https://github.com/astro/deadnix)    |
-| `statix` | Linter for Nix antipatterns    | [statix](https://github.com/oppiliappan/statix) |
+| Tool | Purpose | Link |
+|------|---------|------|
+| `nixfmt` | Nix formatter | [nixfmt](https://github.com/NixOS/nixfmt) |
+| `deadnix` | Finds dead code in Nix files | [deadnix](https://github.com/astro/deadnix) |
+| `statix` | Reports Nix anti-patterns | [statix](https://github.com/oppiliappan/statix) |
 
-All three run as git **pre-commit hooks** *and* are available inside the dev shell (`nix develop`).
+All three are available in the shell and run as pre-commit hooks. The `deadnix` hook reports dead code and fails the commit; it does not edit files. Run `deadnix --edit .` to remove dead code.
 
-## Customizing
+## Customization
 
-### Add Nix Packages
+### Add packages
 
-Edit `develop/shells/default/default.nix` and append packages to the list:
+Edit `develop/shells/default/default.nix` and add entries to `packages`:
 
 ```nix
-{
-  inputs,
-  pkgs,
-  system,
-  ...
-}:
-pkgs.mkShell {
-  packages = with pkgs; [
-    nixfmt
-    deadnix
-    statix
-    just       # command runner
-    alejandra  # alternative formatter
-  ];
-
-  shellHook = ''
-    ${inputs.self.checks.${system}.git-hooks.shellHook}
-  '';
-  buildInputs = inputs.self.checks.${system}.git-hooks.enabledPackages;
-}
+packages = with pkgs; [
+  nixfmt
+  deadnix
+  statix
+  just
+  alejandra
+];
 ```
 
-### Pre-commit Hooks
+The file already wires the git hook shell hook and `enabledPackages`. Keep those lines when you edit it.
 
-Edit `develop/checks/git-hooks/default.nix` to enable, disable, or configure hooks:
+### Pre-commit hooks
+
+Edit `develop/checks/git-hooks/default.nix` to enable, disable, or configure hooks. The file enables all three by default:
 
 ```nix
 { inputs, system, ... }:
@@ -88,18 +76,15 @@ inputs.git-hooks.lib.${system}.run {
     nixfmt.enable = true;
     deadnix.enable = true;
     statix.enable = true;
-    # Add more hooks from git-hooks.nix:
-    # shellcheck.enable = true;
-    # actionlint.enable = true;
   };
 }
 ```
 
-See the full list of available hooks at [git-hooks.nix](https://github.com/cachix/git-hooks.nix).
+To add another hook, enable it in the `hooks` attrset. See [git-hooks.nix](https://github.com/cachix/git-hooks.nix) for the full hook list.
 
-### statix Configuration
+### statix configuration
 
-Tune the linter in `statix.toml` at the repo root:
+Tune the linter in `statix.toml` at the repository root:
 
 ```toml
 disabled = ["repeated_keys"]
@@ -107,41 +92,44 @@ ignore = ['.direnv']
 nix_version = '2.4'
 ```
 
-## Project Structure
+### nixpkgs configuration
+
+The flake sets `nixpkgsConfig.allowUnfree = true` in `flake.nix`. Add other nixpkgs options to the same attrset.
+
+## Project structure
 
 ```
 .
-├── flake.nix                          # Flake entrypoint
-├── statix.toml                        # statix linter config
-├── .envrc                             # direnv: `use flake`
+├── flake.nix                          # flake entrypoint
+├── statix.toml                        # statix linter configuration
+├── .envrc                             # direnv integration (use flake)
 ├── .gitignore
-│
-├── develop/
-│   ├── checks/
-│   │   └── git-hooks/
-│   │       └── default.nix            # Pre-commit hooks (nixfmt, deadnix, statix)
-│   │
-│   └── shells/
-│       └── default/
-│           └── default.nix            # Dev shell packages + shellHook
+└── develop/
+    ├── checks/
+    │   └── git-hooks/
+    │       └── default.nix            # pre-commit hooks
+    └── shells/
+        └── default/
+            └── default.nix            # dev shell packages and shell hook
 ```
 
-## Flake Inputs
+## Flake inputs
 
-| Input       | URL                                                        |
-|-------------|------------------------------------------------------------|
-| `nixpkgs`   | `https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz`       |
-| `purr`      | `https://flakehub.com/f/nixcafe/purr/0.1.*.tar.gz`        |
+| Input | URL |
+|-------|-----|
+| `nixpkgs` | `https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz` |
+| `purr` | `https://flakehub.com/f/nixcafe/purr/0.1.*.tar.gz` |
 | `git-hooks` | `https://flakehub.com/f/cachix/git-hooks.nix/0.1.*.tar.gz` |
 
-All inputs follow `nixpkgs` for a single consistent package set.
+`git-hooks` follows the `nixpkgs` input. `purr` uses `nixpkgs-lib` and does not add another nixpkgs.
 
-## Quick Reference
+## Useful commands
 
 ```bash
-nix develop               # Enter dev shell
-nix flake check            # Run all checks (includes git-hooks)
-nix fmt                    # Format flake.nix with nixfmt
-statix check .             # Lint all Nix files
-deadnix -f                # Scan and remove dead code
+nix develop               # enter the development shell
+nix flake check           # run all checks, including the git hooks
+nix fmt                   # format Nix files with nixfmt
+statix check .            # lint all Nix files
+deadnix -f .              # report dead code; exits 1 if found
+deadnix --edit .          # remove dead code
 ```
